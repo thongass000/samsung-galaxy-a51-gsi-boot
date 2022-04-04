@@ -30,6 +30,9 @@ cd d
 ../magiskboot_x86 hexpatch system/bin/recovery 20f0a6ef38b1681c 20f0a6ef38b9681c
 ../magiskboot_x86 hexpatch system/bin/recovery 23f03aed38b1681c 23f03aed38b9681c
 ../magiskboot_x86 hexpatch system/bin/recovery 20f09eef38b1681c 20f09eef38b9681c
+../magiskboot_x86 hexpatch system/bin/recovery 26f0ceec30b1681c 26f0ceec30b9681c
+../magiskboot_x86 hexpatch system/bin/recovery 24f0fcee30b1681c 24f0fcee30b9681c
+../magiskboot_x86 hexpatch system/bin/recovery 27f02eeb30b1681c 27f02eeb30b9681c
 ../magiskboot_x86 cpio ramdisk.cpio 'add 0755 system/bin/recovery system/bin/recovery'
 ../magiskboot_x86 repack ../fastbootd-recovery.img new-boot.img
 cp new-boot.img ../fastbootd-recovery.img
