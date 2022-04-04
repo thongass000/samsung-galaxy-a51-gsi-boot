@@ -39,5 +39,7 @@ cp new-boot.img ../fastbootd-recovery.img
 ./avbtool add_hash_footer --partition_name recovery --partition_size $(wc -c stock-recovery.img |cut -f 1 -d ' ') --image fastbootd-recovery.img --key phh.pem --algorithm SHA256_RSA4096
 
 lz4 -f fastbootd-recovery.img recovery.img.lz4
-rm fastbootd-recovery.img
 tar cvf fastbootd-recovery.tar recovery.img.lz4
+
+# Clean up
+rm -Rf d fastbootd-recovery.img phh.pub.bin
