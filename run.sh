@@ -1,18 +1,15 @@
 #!/bin/bash
 
-set -ex
+set -x
 
-base=/hdd2/dumps/Samsung/SM-A515F_XEF/
-base=/hdd2/dumps/Samsung/SM-G781U
-base=/home/phh/tmp/SM-G781U_SPR/
+if [ -f recovery.img.lz4 ];then
+	lz4 -d recovery.img.lz4 stock-recovery.img
+elif [ -f recovery.img ];then
+	mv recovery.img stock-recovery.img
+fi
 
-cp $base/recovery.img .
-off=$(grep -ab -o SEANDROIDENFORCE recovery.img |tail -n 1 |cut -d : -f 1)
-dd if=recovery.img of=r.img bs=4k count=$off iflag=count_bytes
-
-cp $base/boot.img .
-off=$(grep -ab -o SEANDROIDENFORCE boot.img |tail -n 1 |cut -d : -f 1)
-dd if=boot.img of=b.img bs=4k count=$off iflag=count_bytes
+off=$(grep -ab -o SEANDROIDENFORCE stock-recovery.img |tail -n 1 |cut -d : -f 1)
+dd if=stock-recovery.img of=fastbootd-recovery.img bs=4k count=$off iflag=count_bytes
 
 if [ ! -f phh.pem ];then
     openssl genrsa -f4 -out phh.pem 4096
@@ -22,21 +19,25 @@ rm -Rf d
 (
 mkdir d
 cd d
-~phh/Downloads/magisk/x86/magiskboot unpack ../r.img
-~phh/Downloads/magisk/x86/magiskboot cpio ramdisk.cpio extract
+../magiskboot_x86 unpack ../fastbootd-recovery.img
+../magiskboot_x86 cpio ramdisk.cpio extract
 # Reverse fastbootd ENG mode check
-~phh/Downloads/magisk/x86/magiskboot hexpatch system/bin/recovery e10313aaf40300aa6ecc009420010034 e10313aaf40300aa6ecc0094 # 20 01 00 35
-~phh/Downloads/magisk/x86/magiskboot hexpatch system/bin/recovery eec3009420010034 eec3009420010035
-~phh/Downloads/magisk/x86/magiskboot hexpatch system/bin/recovery 3ad3009420010034 3ad3009420010035
-~phh/Downloads/magisk/x86/magiskboot hexpatch system/bin/recovery 50c0009420010034 50c0009420010035
-~phh/Downloads/magisk/x86/magiskboot hexpatch system/bin/recovery 080109aae80000b4 080109aae80000b5
-~phh/Downloads/magisk/x86/magiskboot hexpatch system/bin/recovery 20f0a6ef38b1681c 20f0a6ef38b9681c
-~phh/Downloads/magisk/x86/magiskboot hexpatch system/bin/recovery 23f03aed38b1681c 23f03aed38b9681c
-~phh/Downloads/magisk/x86/magiskboot hexpatch system/bin/recovery 20f09eef38b1681c 20f09eef38b9681c
-~phh/Downloads/magisk/x86/magiskboot cpio ramdisk.cpio 'add 0755 system/bin/recovery system/bin/recovery'
-~phh/Downloads/magisk/x86/magiskboot repack ../r.img new-boot.img
-cp new-boot.img ../r.img
+../magiskboot_x86 hexpatch system/bin/recovery e10313aaf40300aa6ecc009420010034 e10313aaf40300aa6ecc0094 # 20 01 00 35
+../magiskboot_x86 hexpatch system/bin/recovery eec3009420010034 eec3009420010035
+../magiskboot_x86 hexpatch system/bin/recovery 3ad3009420010034 3ad3009420010035
+../magiskboot_x86 hexpatch system/bin/recovery 50c0009420010034 50c0009420010035
+../magiskboot_x86 hexpatch system/bin/recovery 080109aae80000b4 080109aae80000b5
+../magiskboot_x86 hexpatch system/bin/recovery 20f0a6ef38b1681c 20f0a6ef38b9681c
+../magiskboot_x86 hexpatch system/bin/recovery 23f03aed38b1681c 23f03aed38b9681c
+../magiskboot_x86 hexpatch system/bin/recovery 20f09eef38b1681c 20f09eef38b9681c
+../magiskboot_x86 cpio ramdisk.cpio 'add 0755 system/bin/recovery system/bin/recovery'
+../magiskboot_x86 repack ../fastbootd-recovery.img new-boot.img
+cp new-boot.img ../fastbootd-recovery.img
 )
 
-/build2/AOSP-11.0/out/host/linux-x86/bin/avbtool extract_public_key --key phh.pem --output phh.pub.bin
-/build2/AOSP-11.0/out/host/linux-x86/bin/avbtool add_hash_footer --partition_name recovery --partition_size $(wc -c recovery.img |cut -f 1 -d ' ') --image r.img --key phh.pem --algorithm SHA256_RSA4096
+./avbtool extract_public_key --key phh.pem --output phh.pub.bin
+./avbtool add_hash_footer --partition_name recovery --partition_size $(wc -c stock-recovery.img |cut -f 1 -d ' ') --image fastbootd-recovery.img --key phh.pem --algorithm SHA256_RSA4096
+
+lz4 -f fastbootd-recovery.img recovery.img.lz4
+rm fastbootd-recovery.img
+tar cvf fastbootd-recovery.tar recovery.img.lz4
