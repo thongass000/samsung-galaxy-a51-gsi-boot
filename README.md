@@ -16,4 +16,11 @@ After cloning this repo, place your `recovery.img` or `recovery.img.lz4` extract
 ```bash
 ./run.sh
 ```
-After patching, you will receive a file called `fastbootd-recovery.tar`, which can be flashed via AP section of Odin.
+## Output
+
+```bash
+output
+├── fastbootd-recovery.tar
+└── recovery.img
+```
+After `run.sh` is executed, in the generated `output` directory, you will have a file called `fastbootd-recovery.tar` which can be used to flash in AP section of Odin and the patched `recovery.img`
