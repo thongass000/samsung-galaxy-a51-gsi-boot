@@ -1,11 +1,10 @@
 #!/bin/bash
 
-pwd=$(pwd)
-PATH=$PATH:$pwd
+PATH=$PATH:$(pwd)
 
 # Clean up
 cleanup () {
-	cd $pwd
+	cd ..
 	rm -Rf fastbootd-recovery.img ramdisk phh.pub.bin
 }
 
@@ -25,11 +24,11 @@ rm -Rf ramdisk
 mkdir ramdisk
 cd ramdisk
 echo
-../magiskboot_x86 unpack ../fastbootd-recovery.img
+magiskboot_x86 unpack ../fastbootd-recovery.img
 
 echo -e "\nExtracting ramdisk ..."
 sleep 3
-../magiskboot_x86 cpio ramdisk.cpio extract
+magiskboot_x86 cpio ramdisk.cpio extract
 
 # Reverse fastbootd ENG mode check
 echo -e "\nPatching ramdisk/system/bin/recovery ..."
@@ -46,7 +45,7 @@ for i in \
 "magiskboot_x86 hexpatch system/bin/recovery 26f0ceec30b1681c 26f0ceec30b9681c" \
 "magiskboot_x86 hexpatch system/bin/recovery 24f0fcee30b1681c 24f0fcee30b9681c" \
 "magiskboot_x86 hexpatch system/bin/recovery 27f02eeb30b1681c 27f02eeb30b9681c"; do
-	../$i
+	$i
 	result=$(( $result + $? ))
 	count=$(( $count + 1 ))
 done
